@@ -1,2 +1,1 @@
-# ES6-
-ES6简析彩票项目
+# MyDogApp
