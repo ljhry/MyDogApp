@@ -34,7 +34,9 @@ class Item extends Component{
     }
     this.addActive = this.addActive.bind(this)
   }
-  
+  // componentDidMount(){
+  //   this.addActive
+  // }
   addActive(){
     // alert(this.state.voted)
     let that = this
