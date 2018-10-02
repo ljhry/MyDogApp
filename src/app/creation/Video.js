@@ -212,7 +212,7 @@ class A extends Component{
         <ActivityIndicator
           animating={true}
           color='#bdc3c7'
-          size="large"
+          size="small"
         />
       </View>
     );
@@ -294,8 +294,15 @@ class AppleScreen extends React.Component {
       rate:1,
       muted:true,
       resizeMode:'contain',
-      repeat:false
+      repeat:false,
+      videoReady:false,
+      videoProgress:0.01,
+      videoTotal:0,
+      currentTime:0,
+      playing:false
     }
+    this._onProgress = this._onProgress.bind(this)
+    this._onEnd = this._onEnd.bind(this)
   }
   _onLoadStart(){
     console.log('a')
@@ -304,12 +311,33 @@ class AppleScreen extends React.Component {
     console.log('a')
 
   }
-  _onProgress(){
-    console.log('a')
-
+  _onProgress(data){
+    console.log(data)
+    if(!this.state.videoReady){
+      this.setState({
+        videoReady:true
+      })
+    }
+    let duration = data.playableDuration
+    let currentTime = data.currentTime
+    let percent = Number((currentTime/duration).toFixed(2))
+    let newState = {
+      videoTotal:duration,
+      currentTime:Number(data.currentTime.toFixed(2)),
+      videoProgress:percent
+    }
+    if(!this.state.videoReady){
+      newState.videoReady = true
+    }
+    if(!this.state.videoReady){
+      newState.play = true
+    }
+    this.setState(newState)
   }
   _onEnd(){
-    console.log('a')
+    this.setState({
+      videoProgress:1
+    })
 
   }
   _onError(){
@@ -320,13 +348,18 @@ class AppleScreen extends React.Component {
     const {navigation} = this.props;
     const username = navigation.getParam('userName','李江')
     const video = navigation.getParam('video','')
-
+  
     return (
+      
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text 
-        // onPress={()=>this.props.navigation.navigate('Home')}
-        >🍎!+{username}</Text>
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+        <View>
+          <Text>
+          🍎!+{username}
+
+          </Text>
+          
+        </View>
+        <View style={{justifyContent: 'center', alignItems: 'center',flex:1}}>
           <Videomp4
             ref='mpVideomp4Player'
             source={{uri:video}}
@@ -344,6 +377,27 @@ class AppleScreen extends React.Component {
             onEnd={this._onEnd}
             onError={this._onError}
           / >
+          {
+            !this.state.videoReady && <ActivityIndicator
+            animating={true}
+            color='#bdc3c7'
+            size="small"
+            />
+          }
+          {
+            this.state.videoReady && !this.state.playing?
+            <Icon
+              onPress={this._rePlay}
+              name='play'
+              style={styles.playIcon}
+            
+            ></Icon>:null
+          }
+          <View style={styles.progressBox}>
+            <View style={[styles.progressBar,{width:width * this.state.videoProgress}]}>
+
+            </View>
+          </View>
         </View>
       </View>
     );
@@ -438,5 +492,19 @@ const styles = StyleSheet.create({
       width:width,
       height:600,
       backgroundColor: '#F5FCFF',
+    },
+    progressBox:{
+      width:width,
+      height:5,
+      backgroundColor:'#ccc'
+    },
+    progressBar:{
+      width:1,
+      height:5,
+      backgroundColor:'red'
+    },
+    playIcon:{
+      width:60,
+      height:60
     }
 });
