@@ -8,7 +8,6 @@
 
 import React, {Component} from 'react';
 import MainStack from './src/components/Main'
-
 export default class App extends Component {
   render() {
     return (

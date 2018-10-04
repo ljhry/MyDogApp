@@ -1,9 +1,12 @@
 import React, {Component} from 'react';
 import {ActivityIndicator, StyleSheet, Text, View,FlatList,Image,TouchableOpacity} from 'react-native';
+
 import {createStackNavigator} from 'react-navigation';
-import Icon from 'react-native-vector-icons/Ionicons'
 import NavigationService from './NavigationService';
-import Videomp4 from 'react-native-video';
+
+import VideoDetail from './VideoDetail';
+import Icon from 'react-native-vector-icons/Ionicons'
+
 const Mock = require('mockjs');
 const config = require('../common/config')
 const request = require('../common/request')
@@ -286,133 +289,16 @@ class A extends Component{
   }
   
 }
-
-class AppleScreen extends React.Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      rate:1,
-      muted:true,
-      resizeMode:'contain',
-      repeat:false,
-      videoReady:false,
-      videoProgress:0.01,
-      videoTotal:0,
-      currentTime:0,
-      playing:false
-    }
-    this._onProgress = this._onProgress.bind(this)
-    this._onEnd = this._onEnd.bind(this)
-  }
-  _onLoadStart(){
-    console.log('a')
-  }
-  _onLoad(){
-    console.log('a')
-
-  }
-  _onProgress(data){
-    console.log(data)
-    if(!this.state.videoReady){
-      this.setState({
-        videoReady:true
-      })
-    }
-    let duration = data.playableDuration
-    let currentTime = data.currentTime
-    let percent = Number((currentTime/duration).toFixed(2))
-    let newState = {
-      videoTotal:duration,
-      currentTime:Number(data.currentTime.toFixed(2)),
-      videoProgress:percent
-    }
-    if(!this.state.videoReady){
-      newState.videoReady = true
-    }
-    if(!this.state.videoReady){
-      newState.play = true
-    }
-    this.setState(newState)
-  }
-  _onEnd(){
-    this.setState({
-      videoProgress:1
-    })
-
-  }
-  _onError(){
-    console.log('a')
-
-  }
-  render() {
-    const {navigation} = this.props;
-    const username = navigation.getParam('userName','李江')
-    const video = navigation.getParam('video','')
-  
-    return (
-      
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <View>
-          <Text>
-          🍎!+{username}
-
-          </Text>
-          
-        </View>
-        <View style={{justifyContent: 'center', alignItems: 'center',flex:1}}>
-          <Videomp4
-            ref='mpVideomp4Player'
-            source={{uri:video}}
-            style={styles.video}
-            volume={5}
-            paused={false}
-            rate={this.state.rate}
-            muted={this.state.muted}
-            resizeMode={this.state.resizeMode}
-            repeat={this.state.repeat}
-
-            onLoadStart={this._onLoadStart}
-            onLoad={this._onLoad}
-            onProgress={this._onProgress}
-            onEnd={this._onEnd}
-            onError={this._onError}
-          / >
-          {
-            !this.state.videoReady && <ActivityIndicator
-            animating={true}
-            color='#bdc3c7'
-            size="small"
-            />
-          }
-          {
-            this.state.videoReady && !this.state.playing?
-            <Icon
-              onPress={this._rePlay}
-              name='play'
-              style={styles.playIcon}
-            
-            ></Icon>:null
-          }
-          <View style={styles.progressBox}>
-            <View style={[styles.progressBar,{width:width * this.state.videoProgress}]}>
-
-            </View>
-          </View>
-        </View>
-      </View>
-    );
-  }
-}
-const RootStack = createStackNavigator({
-    // initialRouteName:AppleScreen,
+const RootStack = createStackNavigator(
+  {
     Home: {
       screen:A
     },
     Details: {
-      screen: AppleScreen
+      screen: VideoDetail
     },
-    
-  },{
+  },
+  {
     navigationOptions: {
       headerTitle:'狗狗说',
 
@@ -425,12 +311,11 @@ const RootStack = createStackNavigator({
       },
     },
   });
+
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#F5FCFF',
-      // alignItems: 'center',
-      // justifyContent: 'center',
+      backgroundColor: '#F5FCFF'
     },
     LoadingContainer: {
       flex: 1,
@@ -487,24 +372,5 @@ const styles = StyleSheet.create({
       right: 35,
       width:50,
       height:50,
-    },
-    video:{
-      width:width,
-      height:600,
-      backgroundColor: '#F5FCFF',
-    },
-    progressBox:{
-      width:width,
-      height:5,
-      backgroundColor:'#ccc'
-    },
-    progressBar:{
-      width:1,
-      height:5,
-      backgroundColor:'red'
-    },
-    playIcon:{
-      width:60,
-      height:60
     }
 });
