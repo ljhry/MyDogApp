@@ -67,18 +67,27 @@ class Item extends Component{
    
   }
   render(){
+    const data = this.props.item.data
+    // console.log(this.props.item)
+    console.log(data.author.avatar)
     return(
       <View style={styles.VideoContainer} >
      
         <View style={styles.TopContainer}>
-          <Text style={{fontSize:15}}>{this.props.item.title}</Text>
+          <Text style={{fontSize:15}}>{data.title}</Text>
         </View>
 
           <TouchableOpacity 
-            onPress={()=>NavigationService.navigate('Details', { userName: this.props.item.title,video:this.props.item.video })}
+            onPress={()=>NavigationService.navigate(
+              'Details', { 
+                title: data.title,
+                video: data.video,
+                avatar: data.author.avatar,
+                nickname:data.author.nickname 
+              })}
           >
             <Image
-              source={{ uri: this.props.item.thumb }}
+              source={{ uri: data.thumb }}
               style={styles.thumbnail}
             />
             <View style={styles.play}> 
@@ -156,11 +165,13 @@ class A extends Component{
           if(pageNo !== 0){
             data.map((v)=>{
               dataBolg.push({
-                thumb:v.thumb,
-                _id:v._id,
-                video:v.video,
+                data:v,
+                // thumb:v.thumb,
+                // _id:v._id,
+                // video:v.video,
                 key:v._id,
-                title:v.title
+                // title:v.title,
+                // author:v.author
               })
               i++;
             })
@@ -168,11 +179,12 @@ class A extends Component{
           }else{
             data.map((v)=>{
               dataBolg.push({
-                thumb:v.thumb,
-                _id:v._id,
-                video:v.video,
+                data:v,
+                // thumb:v.thumb,
+                // _id:v._id,
+                // video:v.video,
                 key:v._id,
-                title:v.title
+                // title:v.title
               })
             })
             dataBolg = dataBolg.concat(this.state.data)

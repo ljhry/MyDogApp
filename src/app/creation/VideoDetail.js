@@ -6,7 +6,8 @@ import {
     View,
     FlatList,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    ScrollView
 } from 'react-native';
 
 import Videomp4 from 'react-native-video';
@@ -120,22 +121,24 @@ export default class VideoDetail extends React.Component {
     };
     render() {
       const {navigation} = this.props;
-      const username = navigation.getParam('userName','李江')
+      const avatar = navigation.getParam('avatar','https://dummyimage.com/600x600/79f2c2')
+      const title = navigation.getParam('title','')
+      const nickname = navigation.getParam('nickname','')
       const video = navigation.getParam('video','')
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Image source={require('../../images/视频.png')} style={{width:42,height:42,borderRadius:21,marginLeft:10}}></Image>
-                    <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>初心练习曲</Text>
+                    <Image source={{uri:avatar}} style={{width:42,height:42,borderRadius:21,marginLeft:10}}></Image>
+                    <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
                 </View>
                 <View style={styles.title}>
-                    <Text style={{fontSize:14,marginLeft:10}}>来评论吧，第一次发视频</Text>
+                <Text style={{fontSize:14,marginLeft:10}}>{title}</Text>
                 </View>
                 <View style={styles.MidContainer}>
                     <View style={styles.videoContainer}>
                         <Videomp4
                             ref='VideoPlayer'
-                            source={{uri:video+'2211'}}
+                            source={{uri:video+'123'}}
                             style={styles.video}
                             volume={5}
                             paused={this.state.paused}
@@ -196,7 +199,11 @@ export default class VideoDetail extends React.Component {
                     </View>
                 </View>
                 <View>
+                    <ScrollView
+                        style={{flex:1,width:width}}
+                    >
 
+                    </ScrollView>
                 </View>
 
             </View>
@@ -210,25 +217,25 @@ const styles = StyleSheet.create({
     },
     header:{
         width:width,
-        height:width/7,
+        height:width/6.5,
         flexDirection: 'row',
         alignItems: 'center',
         marginTop:3
     },
     title:{
         width:width,
-        height:20,
+        height:30,
         justifyContent:'center'
     },
     MidContainer:{
         width:width,
-        height:width/2+3,
+        height:width/1.8+3,
         // backgroundColor:'blue',
         marginTop: 5,
     },
     videoContainer:{
         width:width,
-        height:width/2,
+        height:width/1.8,
         backgroundColor:'yellow',
         justifyContent:'center',
         alignItems:'center',
@@ -237,7 +244,7 @@ const styles = StyleSheet.create({
     },
     video:{
         width:width,
-        height:width/2,
+        height:width/1.8,
         backgroundColor: '#F5FCFF',
     },
     progressBox:{
@@ -276,7 +283,7 @@ const styles = StyleSheet.create({
         position:'absolute',
         fontSize:16,
         color:'#c8d6e5',
-        top:width/4+15
+        top:width/4+18
     }
 })
   
