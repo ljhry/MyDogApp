@@ -10,6 +10,10 @@ import {
     ScrollView
 } from 'react-native';
 
+const Mock = require('mockjs');
+const config = require('../common/config')
+const request = require('../common/request')
+
 import Videomp4 from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons'
 
@@ -19,6 +23,7 @@ export default class VideoDetail extends React.Component {
     constructor(props){
       super(props)
       this.state = {
+        data:[],
         rate:1,
         muted:true,
         resizeMode:'contain',
@@ -37,6 +42,7 @@ export default class VideoDetail extends React.Component {
       this._pause = this._pause.bind(this)
       this._resume = this._resume.bind(this)
       this._onError = this._onError.bind(this)
+      this._fetchData = this._fetchData.bind(this)
     }
     _onLoadStart(){
       console.log('a')
@@ -97,7 +103,42 @@ export default class VideoDetail extends React.Component {
                 paused:false
             })
         }
+    }
+    componentDidMount(){
+        this._fetchData()
+    }
+    _fetchData(){
+        let url = config.api.base + config.api.comment
         
+        request.get(url,{
+            id:124,
+            accessToken:'123a'
+        })
+        .then(function(responData){
+            if(responData && responData.success){
+                let comments = responData.data
+                let dataBolg = []
+
+                comments.map((v)=>{
+                    dataBolg.push({
+                        data:v,
+                        key:v._id
+                    })
+                })
+                dataBolg = this.state.data.concat(dataBolg)
+
+                if(comments && comments.length > 0){
+                    this.setState({
+                        data : dataBolg
+                    })
+                }
+            }
+        })
+        .catch((err)=>{
+            console.log('错误',err)
+        })
+        
+
     }
     static navigationOptions = ({ navigation }) => {
         const params = navigation.state.params || {};
