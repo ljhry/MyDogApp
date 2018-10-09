@@ -69,12 +69,15 @@ class Item extends Component{
   render(){
     const data = this.props.item.data
     // console.log(this.props.item)
-    console.log(data.author.avatar)
+    // console.log(data.author.avatar)
     return(
       <View style={styles.VideoContainer} >
-     
-        <View style={styles.TopContainer}>
-          <Text style={{fontSize:15}}>{data.title}</Text>
+        <View style={styles.header}>
+            <Image source={{uri:data.author.avatar}} style={{width:42,height:42,marginLeft:10}}></Image>
+            <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{data.author.nickname}</Text>
+        </View>
+        <View style={styles.title}>
+          <Text style={{fontSize:15,marginTop:10}}>{data.title}</Text>
         </View>
 
           <TouchableOpacity 
@@ -217,7 +220,7 @@ class A extends Component{
         
       })
       .catch((err) => {
-        console.log('错误',err)
+        console.log('接口错误',err)
       })
       .done();
   }
@@ -335,18 +338,26 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
     },
+    
     header:{
-      paddingTop: 22,
-      paddingBottom: 14,
-      backgroundColor: '#3498db',
+      width:width,
+      height:width/6.5,
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      marginTop:3
     },
-    headerTitle:{
-      color:'#fff',
-      fontSize:17,
-      fontWeight: 'bold',
+    title:{
+      width:width,
+      height:30,
+      justifyContent:'center',
+      marginBottom:12,
+      marginLeft:10
     },
+    // headerTitle:{
+    //   color:'#fff',
+    //   fontSize:17,
+    //   fontWeight: 'bold',
+    // },
     thumbnail: {
       width: width,
       height: width/2
@@ -384,5 +395,6 @@ const styles = StyleSheet.create({
       right: 35,
       width:50,
       height:50,
-    }
+    },
+    
 });

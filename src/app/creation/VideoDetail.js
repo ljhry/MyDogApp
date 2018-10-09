@@ -52,7 +52,7 @@ export default class VideoDetail extends React.Component {
   
     }
     _onProgress(data){
-      console.log(data)
+    //   console.log(data)
       if(!this.state.videoReady){
         this.setState({
           videoReady:true
@@ -107,7 +107,13 @@ export default class VideoDetail extends React.Component {
     componentDidMount(){
         this._fetchData()
     }
+    renderComment({ item }) {
+        return (
+         <CommentItem item={item}></CommentItem>
+        )
+      }
     _fetchData(){
+        let self = this
         let url = config.api.base + config.api.comment
         
         request.get(url,{
@@ -117,6 +123,7 @@ export default class VideoDetail extends React.Component {
         .then(function(responData){
             if(responData && responData.success){
                 let comments = responData.data
+                // console.log('aaa',comments)
                 let dataBolg = []
 
                 comments.map((v)=>{
@@ -125,10 +132,10 @@ export default class VideoDetail extends React.Component {
                         key:v._id
                     })
                 })
-                dataBolg = this.state.data.concat(dataBolg)
+                // dataBolg = this.state.data.concat(dataBolg)
 
                 if(comments && comments.length > 0){
-                    this.setState({
+                    self.setState({
                         data : dataBolg
                     })
                 }
@@ -139,6 +146,11 @@ export default class VideoDetail extends React.Component {
         })
         
 
+    }
+    static tabBarOptions = ({ navigation }) => {
+        return {
+            tabBarVisible:false
+        }
     }
     static navigationOptions = ({ navigation }) => {
         const params = navigation.state.params || {};
@@ -168,18 +180,12 @@ export default class VideoDetail extends React.Component {
       const video = navigation.getParam('video','')
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <Image source={{uri:avatar}} style={{width:42,height:42,borderRadius:21,marginLeft:10}}></Image>
-                    <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
-                </View>
-                <View style={styles.title}>
-                <Text style={{fontSize:14,marginLeft:10}}>{title}</Text>
-                </View>
+                
                 <View style={styles.MidContainer}>
                     <View style={styles.videoContainer}>
                         <Videomp4
                             ref='VideoPlayer'
-                            source={{uri:video+'123'}}
+                            source={{uri:video+'1'}}
                             style={styles.video}
                             volume={5}
                             paused={this.state.paused}
@@ -239,18 +245,45 @@ export default class VideoDetail extends React.Component {
                         </View>
                     </View>
                 </View>
-                <View>
-                    <ScrollView
-                        style={{flex:1,width:width}}
-                    >
-
-                    </ScrollView>
+                <View style={styles.header}>
+                    <Image source={{uri:avatar}} style={{width:42,height:42,marginLeft:10}}></Image>
+                    <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
                 </View>
-
+                <View style={styles.title}>
+                <Text style={{fontSize:15,marginLeft:10}}>{title}</Text>
+                </View>
+                <View style={{width:width,marginTop:10}}>
+                <FlatList 
+                    data={this.state.data}
+                    renderItem={this.renderComment}
+                    onEndReachedThreshold={20}
+                    showsVerticalScrollIndicator={false}    
+                    onEndReachedThreshold={20}
+                />
+                </View>
             </View>
         );
     }
   }
+class CommentItem extends Component{
+    constructor(props){
+        super(props)
+    }
+    render(){
+        const data = this.props.item.data
+        // console.log(data)
+        return (
+            <View style={styles.commpentContainer}>
+                <View style={styles.imageContainer}>
+                    <Image style={{width:36,height:36}} roundAsCircle={true} source={{uri:data.replyBy.avatar}}></Image>
+                </View>
+                <View style={styles.commentDetails}>
+                    <Text style={{marginRight:5,fontSize:16}}>{data.content}</Text>
+                </View>
+            </View>
+        )
+    }
+}
 const styles = StyleSheet.create({
     container:{
         flex: 1,
@@ -270,22 +303,20 @@ const styles = StyleSheet.create({
     },
     MidContainer:{
         width:width,
-        height:width/1.8+3,
+        height:width/2+3,
         // backgroundColor:'blue',
-        marginTop: 5,
     },
     videoContainer:{
         width:width,
-        height:width/1.8,
+        height:width/2,
         backgroundColor:'yellow',
         justifyContent:'center',
         alignItems:'center',
-        marginTop: 5,
 
     },
     video:{
         width:width,
-        height:width/1.8,
+        height:width/2,
         backgroundColor: '#F5FCFF',
     },
     progressBox:{
@@ -325,6 +356,27 @@ const styles = StyleSheet.create({
         fontSize:16,
         color:'#c8d6e5',
         top:width/4+18
+    },
+    commpentContainer:{
+        flex:1,
+        height:80,
+        marginTop:3,
+        marginBottom: 5,
+        flexDirection:'row',
+        backgroundColor: '#F5FCFF',
+        alignItems:'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    imageContainer:{
+        marginLeft:8,
+        justifyContent:'center'
+    },
+    commentDetails:{
+        marginLeft:10,
+        width:width/1.2,
+        justifyContent:'center'
+
     }
 })
   
