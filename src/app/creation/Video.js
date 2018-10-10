@@ -6,6 +6,7 @@ import NavigationService from './NavigationService';
 
 import VideoDetail from './VideoDetail';
 import Icon from 'react-native-vector-icons/Ionicons'
+import Main from '../../components/Main'
 
 const Mock = require('mockjs');
 const config = require('../common/config')
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
       marginTop:3
     },
     title:{
-      width:width,
+      width:width/1.011,
       height:30,
       justifyContent:'center',
       marginBottom:12,
@@ -366,6 +367,7 @@ const styles = StyleSheet.create({
       flex: 1,
       backgroundColor: '#e9ebec',
       marginBottom: 15,
+      shadowColor: '#ccc',
     },
     TopContainer:{
       flex:1,

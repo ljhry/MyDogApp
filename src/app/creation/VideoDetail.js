@@ -158,7 +158,7 @@ export default class VideoDetail extends React.Component {
           headerStyle: {
             backgroundColor: '#3498db',
           },
-        headerTintColor: '#fff',
+          headerTintColor: '#fff',
 
           headerRight: (
            <Icon
@@ -169,7 +169,8 @@ export default class VideoDetail extends React.Component {
             onPress={()=>{alert('尽情期待！！！')}}
            ></Icon>
           ),
-          headerTitle:'视频详情'
+          headerTitle:'视频详情',
+          tabBarVisible:false,
         };
     };
     render() {
@@ -246,12 +247,22 @@ export default class VideoDetail extends React.Component {
                     </View>
                 </View>
                 <View style={styles.header}>
-                    <Image source={{uri:avatar}} style={{width:42,height:42,marginLeft:10}}></Image>
-                    <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
-                </View>
+                    <Image source={{uri:avatar}} style={{width:45,height:45,marginLeft:10,borderRadius:22.5}}></Image>
                 <View style={styles.title}>
+                <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
+
                 <Text style={{fontSize:15,marginLeft:10}}>{title}</Text>
                 </View>
+                </View>
+                <View style={{width:width,height:78,marginTop:8,alignItems:'center'}}>
+                    <View style={styles.writeComment}>
+                        <Text style={{fontSize:13,color:'#ccc',marginLeft:5}}>敢不敢评论一个...</Text>
+                    </View>
+                    <View style={{width:width,alignItems:'flex-start',marginLeft:10,marginTop:3}}>
+                        <Text style={{fontWeight:'bold'}}>精彩评论</Text>
+                    </View>
+                </View>
+
                 <View style={{width:width,marginTop:10}}>
                 <FlatList 
                     data={this.state.data}
@@ -275,10 +286,11 @@ class CommentItem extends Component{
         return (
             <View style={styles.commpentContainer}>
                 <View style={styles.imageContainer}>
-                    <Image style={{width:36,height:36}} roundAsCircle={true} source={{uri:data.replyBy.avatar}}></Image>
+                    <Image style={{width:36,height:36,borderRadius:18}} roundAsCircle={true} source={{uri:data.replyBy.avatar}}></Image>
                 </View>
                 <View style={styles.commentDetails}>
-                    <Text style={{marginRight:5,fontSize:16}}>{data.content}</Text>
+                    <Text style={{marginRight:5,fontSize:16,fontWeight:'bold'}}>{data.replyBy.nickname}</Text>
+                    <Text style={{marginRight:5,fontSize:15}}>{data.content}</Text>
                 </View>
             </View>
         )
@@ -297,7 +309,7 @@ const styles = StyleSheet.create({
         marginTop:3
     },
     title:{
-        width:width,
+        width:width-60,
         height:30,
         justifyContent:'center'
     },
@@ -359,7 +371,7 @@ const styles = StyleSheet.create({
     },
     commpentContainer:{
         flex:1,
-        height:80,
+        height:70,
         marginTop:3,
         marginBottom: 5,
         flexDirection:'row',
@@ -377,6 +389,13 @@ const styles = StyleSheet.create({
         width:width/1.2,
         justifyContent:'center'
 
+    },
+    writeComment:{
+        width:width/1.05,
+        height:65,
+        borderColor: '#ccc',
+        borderRadius: 3,
+        borderWidth: 1,
     }
 })
   
