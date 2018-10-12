@@ -16,9 +16,23 @@ const request = require('../common/request')
 
 import Videomp4 from 'react-native-video';
 import Icon from 'react-native-vector-icons/Ionicons'
+import NavigationService from './NavigationService';
+import {createStackNavigator} from 'react-navigation';
+
 
 const Dimensions = require('Dimensions')
 const {width} = Dimensions.get('window')
+
+
+// class _Comment extends Component {
+//     render() {
+//       return (
+//         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+//           <Text>🍎!</Text>
+//         </View>
+//       );
+//     }
+//   }
 export default class VideoDetail extends React.Component {
     constructor(props){
       super(props)
@@ -254,10 +268,22 @@ export default class VideoDetail extends React.Component {
                 <Text style={{fontSize:15,marginLeft:10}}>{title}</Text>
                 </View>
                 </View>
-                <View style={{width:width,height:78,marginTop:8,alignItems:'center'}}>
-                    <View style={styles.writeComment}>
+                <View style={{width:width,height:55,marginTop:8,alignItems:'center'}}>
+                    <TouchableOpacity 
+                        style={styles.writeComment}
+                        // onPress={()=>NavigationService.navigate(
+                        //     '_Comment', { 
+                        //     //   title: data.title,
+                        //     //   video: data.video,
+                        //     //   avatar: data.author.avatar,
+                        //     //   nickname:data.author.nickname 
+                        //     })
+                        onPress={() => this.props.navigation.navigate('Comment')
+                        
+                        }
+                        >
                         <Text style={{fontSize:13,color:'#ccc',marginLeft:5}}>敢不敢评论一个...</Text>
-                    </View>
+                    </TouchableOpacity>
                     <View style={{width:width,alignItems:'flex-start',marginLeft:10,marginTop:3}}>
                         <Text style={{fontWeight:'bold'}}>精彩评论</Text>
                     </View>
@@ -276,6 +302,8 @@ export default class VideoDetail extends React.Component {
         );
     }
   }
+
+  
 class CommentItem extends Component{
     constructor(props){
         super(props)
@@ -392,10 +420,29 @@ const styles = StyleSheet.create({
     },
     writeComment:{
         width:width/1.05,
-        height:65,
+        height:45,
         borderColor: '#ccc',
         borderRadius: 3,
         borderWidth: 1,
     }
 })
+
+// export default RootStack2 = createStackNavigator(
+//     {
+//       Home:VideoDetail,
+//       _Comment: _Comment
+//     },
+//     {
+//       navigationOptions: {
+//         headerTitle:'狗狗说',
   
+//         headerStyle: {
+//           backgroundColor: '#3498db',
+//         },
+//         headerTintColor: '#fff',
+//         headerTitleStyle: {
+//           fontWeight: 'bold',
+//         },
+//       },
+//     }
+//     );

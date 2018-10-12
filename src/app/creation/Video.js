@@ -7,7 +7,7 @@ import NavigationService from './NavigationService';
 import VideoDetail from './VideoDetail';
 import Icon from 'react-native-vector-icons/Ionicons'
 import Main from '../../components/Main'
-
+import Comments from './Comment'
 const Mock = require('mockjs');
 const config = require('../common/config')
 const request = require('../common/request')
@@ -313,6 +313,9 @@ const RootStack = createStackNavigator(
     Details: {
       screen: VideoDetail
     },
+    Comment: {
+      screen: Comments
+    }
   },
   {
     navigationOptions: {
