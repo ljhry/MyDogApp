@@ -7,7 +7,10 @@ import {
     FlatList,
     Image,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    TextInput,
+    Button,
+    Keyboard
 } from 'react-native';
 
 const Mock = require('mockjs');
@@ -36,6 +39,8 @@ const {width} = Dimensions.get('window')
 export default class VideoDetail extends React.Component {
     constructor(props){
       super(props)
+      this.keyboardDidShowListener = null;
+      this.keyboardDidHideListener = null;
       this.state = {
         data:[],
         rate:1,
@@ -48,7 +53,10 @@ export default class VideoDetail extends React.Component {
         currentTime:0,
         playing:false,
         paused:false,
-        videoOk:true
+        videoOk:true,
+        content:'',
+        isSending:false,
+        KeyboardShown: false
       }
       this._onProgress = this._onProgress.bind(this)
       this._onEnd = this._onEnd.bind(this)
@@ -57,7 +65,48 @@ export default class VideoDetail extends React.Component {
       this._resume = this._resume.bind(this)
       this._onError = this._onError.bind(this)
       this._fetchData = this._fetchData.bind(this)
+      this._submit = this._submit.bind(this)
+    //   this.keyboardDidHideHandler = this.keyboardDidHideListener.bind(this)
+    //   this.keyboardDidShowHandler = this.keyboardDidShowHandler.bind(this)
+        this.dissmissKeyboard = this.dissmissKeyboard.bind(this)
+
     }
+    componentWillMount() {
+        //监听键盘弹出事件
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow',
+          this.keyboardDidShowHandler.bind(this));
+        //监听键盘隐藏事件
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide',
+          this.keyboardDidHideHandler.bind(this));
+      }
+     
+      componentWillUnmount() {
+        //卸载键盘弹出事件监听
+        if(this.keyboardDidShowListener != null) {
+          this.keyboardDidShowListener.remove();
+        }
+        //卸载键盘隐藏事件监听
+        if(this.keyboardDidHideListener != null) {
+          this.keyboardDidHideListener.remove();
+        }
+      }
+     
+      //键盘弹出事件响应
+      keyboardDidShowHandler(event) {
+        this.setState({KeyboardShown: true});
+        console.log(event.endCoordinates.height);
+      }
+     
+      //键盘隐藏事件响应
+      keyboardDidHideHandler(event) {
+        this.setState({KeyboardShown: false});
+      }
+     
+      //强制隐藏键盘
+      dissmissKeyboard() {
+        Keyboard.dismiss();
+        console.log("输入框当前焦点状态：" + this.refs.bottomInput.isFocused());
+      }
     _onLoadStart(){
       console.log('a')
     }
@@ -153,19 +202,71 @@ export default class VideoDetail extends React.Component {
                         data : dataBolg
                     })
                 }
+                // console.log('sv',self.state.data)
             }
         })
         .catch((err)=>{
             console.log('错误',err)
         })
-        
-
     }
-    static tabBarOptions = ({ navigation }) => {
-        return {
-            tabBarVisible:false
+    _submit(){
+        let self = this
+        if(!self.state.content){
+          alert('留言不能为空')
+          return
         }
-    }
+        if(self.state.isSending){
+          alert('在评论')
+        }
+        self.setState({
+          isSending:true
+        },function(){
+          let body = {
+            accessToken:'abc',
+            creation:'123',
+            content:self.state.content
+          }
+          var url = config.api.base + config.api.comment
+          request.post(url,body)
+            .then(function(data){
+              if(data && data.success){
+                console.log('gg',self.state.data)
+                let content = self.state.content
+                let arr = []
+                // let num = Math.random()-0.5
+                // let time = new Date().toLocaleString()
+                items = [{data:{
+                  content:content,
+                  replyBy:{
+                    nickname:'狗狗说',
+                    avatar:'https://dummyimage.com/600x600/79f2c2'
+                  }
+                }}].concat(self.state.data)
+
+                items.map((v) => {
+                    arr.push({
+                        data:v.data,
+                        // key:time
+                    })
+                })
+                console.log('items',items)
+                self.setState({
+                  isSending:false,
+                  data:arr,
+                  content:''
+                })
+                self.dissmissKeyboard.bind(this)
+                // console.log('最终',self.state.data)
+              }
+              
+            })
+        })
+      }
+    // static tabBarOptions = ({ navigation }) => {
+    //     return {
+    //         tabBarVisible:false
+    //     }
+    // }
     static navigationOptions = ({ navigation }) => {
         const params = navigation.state.params || {};
         return {
@@ -180,7 +281,10 @@ export default class VideoDetail extends React.Component {
             size={28}
             color='#fff'
             style={{marginRight:10}}
-            onPress={()=>{alert('尽情期待！！！')}}
+            onPress={
+                this.dissmissKeyboard
+
+            }
            ></Icon>
           ),
           headerTitle:'视频详情',
@@ -260,30 +364,34 @@ export default class VideoDetail extends React.Component {
                         </View>
                     </View>
                 </View>
-                <View style={styles.header}>
+                {/* <View style={styles.header}>
                     <Image source={{uri:avatar}} style={{width:45,height:45,marginLeft:10,borderRadius:22.5}}></Image>
                 <View style={styles.title}>
                 <Text style={{fontSize:16,marginLeft:10,fontWeight:'bold',color:'#000'}}>{nickname}</Text>
 
                 <Text style={{fontSize:15,marginLeft:10}}>{title}</Text>
                 </View>
-                </View>
-                <View style={{width:width,height:55,marginTop:8,alignItems:'center'}}>
-                    <TouchableOpacity 
-                        style={styles.writeComment}
-                        // onPress={()=>NavigationService.navigate(
-                        //     '_Comment', { 
-                        //     //   title: data.title,
-                        //     //   video: data.video,
-                        //     //   avatar: data.author.avatar,
-                        //     //   nickname:data.author.nickname 
-                        //     })
-                        onPress={() => this.props.navigation.navigate('Comment')
-                        
-                        }
-                        >
-                        <Text style={{fontSize:13,color:'#ccc',marginLeft:5}}>敢不敢评论一个...</Text>
-                    </TouchableOpacity>
+                </View> */}
+                <View style={{width:width,height:55,marginTop:5,alignItems:'center'}}>
+                    <View style={styles.writeComment}>
+                        <View style={{fontSize:13,color:'#000',marginLeft:5,width:width/1.25,height:43,borderWidth:1,borderRadius:10,borderColor:'#ccc'}}>
+                            <TextInput 
+                                placeholder="Type here to translate!"
+                                onChangeText={(content) => this.setState({content})}
+                                value={this.state.content}
+                                ref="bottomInput"
+                            ></TextInput>
+                        </View>
+                        <View style={{height:35,width:50,marginLeft:5}}>
+                            <Button
+                                // onPress={() =>alert(1)}
+                                onPress={this._submit}
+                                title="发布"
+                                color="#8c7ae6"
+                            ></Button>
+                        </View>
+                       
+                    </View>
                     <View style={{width:width,alignItems:'flex-start',marginLeft:10,marginTop:3}}>
                         <Text style={{fontWeight:'bold'}}>精彩评论</Text>
                     </View>
@@ -419,11 +527,11 @@ const styles = StyleSheet.create({
 
     },
     writeComment:{
-        width:width/1.05,
-        height:45,
+        width:width/1.01,
+        height:43,
         borderColor: '#ccc',
-        borderRadius: 3,
-        borderWidth: 1,
+        flexDirection:'row',
+        alignItems:'center'
     }
 })
 

@@ -12,6 +12,9 @@ import {
   Button
 } from 'react-native';
 
+const config = require('../common/config')
+const request = require('../common/request')
+
 const Dimensions = require('Dimensions')
 const {width} = Dimensions.get('window')
 
@@ -19,8 +22,56 @@ export default class Comment extends Component {
   constructor(props){
     super(props)
     this.state = {
-      text:''
+      text:'',
+      isSending:false,
+      data:''
     }
+    this._submit = this._submit.bind(this)
+   
+  }
+  componentDidMount(){
+    const {navigation} = this.props;
+    const data = navigation.getParam('comment','')
+    this.setState({
+      data:data
+    })
+  }
+  _submit(){
+   
+    if(!this.state.text){
+      alert('留言不能为空')
+    }
+    if(!this.state.isSending){
+      alert('在评论')
+    }
+    this.setState({
+      isSending:true
+    },function(){
+      var body = {
+        accessToken:'abc',
+        creation:'123',
+        content:this.state.text
+      }
+      var url = config.api.base + config.api.comment
+      request.post(url,body)
+        .then(function(data){
+          if(data && data.success){
+            // console.log(this.props.data)
+            items = [{
+              content:thi.props.text,
+              replyBy:{
+                nickname:'狗狗说',
+                avatar:'https://dummyimage.com/600x600/79f2c2'
+              }
+            }]
+            this.setState({
+              isSending:false,
+              data:this.state.data.concat(items)
+            })
+          }
+          
+        })
+    })
   }
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
@@ -45,7 +96,7 @@ export default class Comment extends Component {
             ></TextInput>
             <View style={{marginTop: 100,}}>
             <Button
-              // onPress={()=>{alert(1)}}
+              // onPress={this._submit}
               onPress={() => this.props.navigation.navigate('Details')}
 
               title="发布"
