@@ -66,9 +66,8 @@ export default class VideoDetail extends React.Component {
       this._onError = this._onError.bind(this)
       this._fetchData = this._fetchData.bind(this)
       this._submit = this._submit.bind(this)
-    //   this.keyboardDidHideHandler = this.keyboardDidHideListener.bind(this)
-    //   this.keyboardDidShowHandler = this.keyboardDidShowHandler.bind(this)
-        this.dissmissKeyboard = this.dissmissKeyboard.bind(this)
+    
+      this.dissmissKeyboard = this.dissmissKeyboard.bind(this)
 
     }
     componentWillMount() {
@@ -233,8 +232,6 @@ export default class VideoDetail extends React.Component {
                 console.log('gg',self.state.data)
                 let content = self.state.content
                 let arr = []
-                // let num = Math.random()-0.5
-                // let time = new Date().toLocaleString()
                 items = [{data:{
                   content:content,
                   replyBy:{
@@ -243,10 +240,10 @@ export default class VideoDetail extends React.Component {
                   }
                 }}].concat(self.state.data)
 
-                items.map((v) => {
+                items.map((v,index) => {
                     arr.push({
                         data:v.data,
-                        // key:time
+                        key:index.toString()
                     })
                 })
                 console.log('items',items)
@@ -255,7 +252,7 @@ export default class VideoDetail extends React.Component {
                   data:arr,
                   content:''
                 })
-                self.dissmissKeyboard.bind(this)
+                self.dissmissKeyboard()
                 // console.log('最终',self.state.data)
               }
               

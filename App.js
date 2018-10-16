@@ -8,10 +8,24 @@
 
 import React, {Component} from 'react';
 import MainStack from './src/components/Main'
+// import A from './src/test'
+import Login from './src/app/login_register/login'
+import {createStackNavigator,createSwitchNavigator} from 'react-navigation';
 export default class App extends Component {
   render() {
     return (
-        <MainStack></MainStack>
+        // <A></A>
+        <RootStack></RootStack>
     );
   }
 }
+const RootStack = createSwitchNavigator(
+  {
+    Main: {
+      screen: Login,
+    },
+    MyModal: {
+      screen: MainStack,
+    },
+  }
+);
