@@ -11,6 +11,8 @@ module.exports = {
         base: "http://rap2api.taobao.org/app/mock/86092/",
         creations: "api/creations",
         comment: "api/comments",
-        up: "api/up"
+        up: "api/up",
+        signup: "api/u/signup",
+        verify: "api/u/verify"
     }
 }

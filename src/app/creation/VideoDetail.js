@@ -371,7 +371,7 @@ export default class VideoDetail extends React.Component {
                 </View> */}
                 <View style={{width:width,height:55,marginTop:5,alignItems:'center'}}>
                     <View style={styles.writeComment}>
-                        <View style={{fontSize:13,color:'#000',marginLeft:5,width:width/1.25,height:43,borderWidth:1,borderRadius:10,borderColor:'#ccc'}}>
+                        <View style={{fontSize:13,color:'#000',marginLeft:5,width:width/1.25,height:43,borderWidth:1,borderRadius:5,borderColor:'#ccc'}}>
                             <TextInput 
                                 placeholder="Type here to translate!"
                                 onChangeText={(content) => this.setState({content})}

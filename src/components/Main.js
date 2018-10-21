@@ -5,7 +5,16 @@ import AddVideo from '../app/edit/AddVideo';
 import MySetting from '../app/account/MySetting';
 import Video from '../app/creation/Video'
 
-export default createBottomTabNavigator({
+
+export default class Main extends Component {
+  render() {
+    return (
+      <RootStack></RootStack>
+    )
+  }
+}
+
+const RootStack = createBottomTabNavigator({
     Home:{screen:Video},
     AddVideo:{screen: AddVideo},
     MySetting:{screen: MySetting}
