@@ -48,7 +48,7 @@ export default class Login extends Component {
       .post(verifyURL, body)
       .then(data => {
         if (data && data.success) {
-          AsyncStorage.setItem('user',that.state.phoneNumber)
+          AsyncStorage.setItem('user',JSON.stringify(data.data))
           that.props.navigation.navigate('MyModal')
         } else {
           alert("登录失败");

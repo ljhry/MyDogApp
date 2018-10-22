@@ -30,7 +30,7 @@ export default class App extends Component {
     let that = this
     AsyncStorage.getItem('user')
       .then((data) => {
-        console.log('存储',data)
+        console.info('存储',data)
         if(data){
           that.setState({
             logined:true
@@ -39,7 +39,6 @@ export default class App extends Component {
         
       })
   }
-  
   render() {
     // console.log('asd',!this.state.logined)
     // console.log('sb',AsyncStorage.getItem('user'))
