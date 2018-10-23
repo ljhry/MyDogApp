@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import ImagePicker from "react-native-image-picker";
+import sha1 from 'sha1'
+const config = require("../common/config");
+const request = require("../common/request");
 const Dimensions = require("Dimensions");
 const { width } = Dimensions.get("window");
 var options = {
@@ -26,8 +29,8 @@ var options = {
   aspectY: 1,
   quality: 0.8,
   quality: 0.75,
-  maxWidth: 600, // 加了这两句控制大小
-  maxHeight: 600, // 加了这两句控制大小
+  maxWidth: 700, // 加了这两句控制大小
+  maxHeight: 700, // 加了这两句控制大小
   allowsEditing: true,
   noData: false,
   storageOptions: {
@@ -35,6 +38,15 @@ var options = {
     path: "images"
   }
 };
+let CLOUDINARY = {
+  'cloud_name': 'danmvxjxw',  
+  'api_key': '272947267451358',  
+  'api_secret': 'B_JdPDsu5h8F3TBb7gJPpp9B8n8',  
+  'base': 'http://res.cloudinary.com/danmvxjxw',
+  'image':'https://api.cloudinary.com/v1_1/danmvxjxw/image/upload',
+  'video':'https://api.cloudinary.com/v1_1/danmvxjxw/image/video',
+  'audio':'https://api.cloudinary.com/v1_1/danmvxjxw/image/audio',
+}
 export default class MySetting extends Component {
   constructor(props) {
     super(props);
@@ -54,7 +66,23 @@ export default class MySetting extends Component {
       if (user && user.accessToken) {
         that.setState({
           user: user
-        });
+        })
+        let timerStamp = Date.now()
+        let tags = 'app,avatar'
+        let folder = 'avatar'
+        let signatureURL = config.api.base + config.api.signature
+
+        request.post(signatureURL,{
+          accessToken:accessToken,
+          timestamp:timestamp,
+          type:'avatar'
+        })
+        .then((data) =>{
+          if(data && data.success){
+            let signature = 'folder='+folder+'&tags='+tags+'&timestamp='+timestamp+CLOUDINARY.api_secret
+            signature = sha1(signature)
+          }
+        })
       }
     });
   }
@@ -109,7 +137,9 @@ export default class MySetting extends Component {
         ) : (
           <View style={styles.avatarContainer}>
             <Text style={styles.avatarTitle}>添加狗狗头像</Text>
-            <TouchableOpacity style={styles.avatarBox}>
+            <TouchableOpacity 
+              style={styles.avatarBox}
+              onPress={this.pickPhoto}>
               <Icon name="ios-cloud-upload" style={styles.plusIcon} />
             </TouchableOpacity>
           </View>
