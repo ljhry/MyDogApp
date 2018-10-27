@@ -184,7 +184,7 @@ class A extends Component {
         page: pageNo
       })
       .then(responseData => {
-        console.log(responseData);
+        // console.log(responseData);
         if (responseData.success) {
           let data = responseData.data;
           let dataBolg = [];

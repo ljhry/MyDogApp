@@ -13,6 +13,8 @@ module.exports = {
         comment: "api/comments",
         up: "api/up",
         signup: "api/u/signup",
-        verify: "api/u/verify"
+        verify: "api/u/verify",
+        signature:"api/signature",
+        update:"api/u/update"
     }
 }
