@@ -32,8 +32,11 @@ export default class App extends Component {
       .then((data) => {
         console.info('存储',data)
         if(data){
+          // s
+          // user[1].logined
+          // console.log(logined);
           that.setState({
-            logined:true
+            logined:true,
           })
         }
         
@@ -49,9 +52,6 @@ export default class App extends Component {
     }else{
       return <MainStack></MainStack>
     }
-    return (
-        <RootStack></RootStack>
-    );
   }
 }
 const RootStack = createSwitchNavigator(

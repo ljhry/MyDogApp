@@ -41,7 +41,8 @@ export default class Login extends Component {
       return alert('手机号或用户名不能为空！')
     }
     let body = {
-      phoneNumber: phoneNumber
+      phoneNumber: phoneNumber,
+      verifyCode:VerifyCode
     };
     let verifyURL = config.api.base + config.api.verify;
     request
@@ -51,7 +52,7 @@ export default class Login extends Component {
           AsyncStorage.setItem('user',JSON.stringify(data.data))
           that.props.navigation.navigate('MyModal')
         } else {
-          alert("登录失败");
+          alert(data.err);
         }
       })
       .catch(err => {
@@ -80,6 +81,7 @@ export default class Login extends Component {
       .then(data => {
         if (data && data.success) {
           that._showVerifyCode();
+
         } else {
           alert("获取验证码失败");
         }
@@ -120,7 +122,7 @@ export default class Login extends Component {
               style={{ position: "absolute" }}
             />
           </View>
-          {this.state.codeSent ? (
+          {!this.state.codeSent ? (
             <View style={[styles.input]}>
               <TextInput
                 style={{
@@ -160,7 +162,7 @@ export default class Login extends Component {
                 </TouchableOpacity>
             </View>
           ) : null}
-          {this.state.codeSent ? (
+          {!this.state.codeSent ? (
             <TouchableOpacity
               // onPress={() => this.props.navigation.navigate('MyModal')}
               onPress={this._submit}

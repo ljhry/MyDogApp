@@ -41,15 +41,6 @@ var options = {
     path: "images"
   }
 };
-let CLOUDINARY = {
-  cloud_name: "danmvxjxw",
-  api_key: "272947267451358",
-  api_secret: "B_JdPDsu5h8F3TBb7gJPpp9B8n8",
-  base: "http://res.cloudinary.com/danmvxjxw",
-  image: "https://api.cloudinary.com/v1_1/danmvxjxw/image/upload/dog",
-  video: "https://api.cloudinary.com/v1_1/danmvxjxw/video/video",
-  audio: "https://api.cloudinary.com/v1_1/danmvxjxw/audio/audio"
-};
 let editInputData = [
   {
     iconName : 'ios-paw',
@@ -60,8 +51,8 @@ let editInputData = [
   {
     iconName :'logo-github',
     placeholder : '品种',
-    key:'bread',
-    type:'bread'
+    key:'breed',
+    type:'breed'
 
   },
   {
@@ -72,13 +63,17 @@ let editInputData = [
   },
 ]
 function avatar(id, type) {
-  if (id.indexOf("http") > -1) {
-    return id;
-  }
-  if (id.indexOf("data:image")) {
-    return id;
-  }
-  return CLOUDINARY.base + "/" + type + "/upload/" + id;
+  // if (id.indexOf("http") > -1) {
+  //   return id;
+  // }
+  // if (id.indexOf("data:image")) {
+  //   return id;
+  // }
+  // if(id.indexOf('avatar/') > -1){
+  //   return CLOUDINARY.base + "/" + type + "/upload/" + id;
+
+  // }
+  return 'http://pjbgjrvrt.bkt.clouddn.com/' + id
 }
 export default class MySetting extends Component {
   constructor(props) {
@@ -91,6 +86,8 @@ export default class MySetting extends Component {
     };
     this.pickPhoto = this.pickPhoto.bind(this);
     this._asyncUser = this._asyncUser.bind(this)
+    this.logout = this.logout.bind(this)
+
   }
   componentDidMount() {
     let that = this;
@@ -98,6 +95,7 @@ export default class MySetting extends Component {
       let user;
       if (data) {
         user = JSON.parse(data);
+        console.log('用户信息缓存：',user);
       }
       if (user && user.accessToken) {
         that.setState({
@@ -112,7 +110,7 @@ export default class MySetting extends Component {
   changeState(key,value){
     let user = this.state.user
     user[key] = value
-    console.log(value)
+    // console.log(user)
     this.setState({
       user:user
     })
@@ -127,8 +125,9 @@ export default class MySetting extends Component {
       request.post(url, user).then(data => {
         if (data && data.success) {
           let user = data.data;
+          console.log('响应',user)
           if (isAvatar) {
-            alert("头像更新成功");
+            alert("信息更新成功");
           }
           that.setState(
             {
@@ -146,6 +145,19 @@ export default class MySetting extends Component {
     let that = this
     // that._asyncUser(true)
   }
+  getQiniuToken(){
+    let accessToken = this.state.user.accessToken;
+    let signatureURL = config.api.base + config.api.signature;
+    return request
+    .post(signatureURL, {
+      accessToken: accessToken,
+      cloud:'qiniu',
+      type: "avatar"
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
   pickPhoto() {
     let that = this;
     ImagePicker.showImagePicker(options, res => {
@@ -160,71 +172,48 @@ export default class MySetting extends Component {
         console.log("User tapped custom button: ", res.customButton);
       } else {
         // You can display the image using either data:
-        // const source = {uri: 'data:image/jpeg;base64,' + res.data, isStatic: true};
+        const avatarData = {uri: 'data:image/jpeg;base64,' + res.data, isStatic: true};
 
-        let avatarData = { uri: "data:image/jpeg;base64" + res.data };
-        let user = that.state.user;
-        user.avatar = avatarData.uri;
-        that.setState({
-          user: user
-        });
-
-        let timestamp = Date.now();
-        let tags = "app,avatar";
-        let folder = "avatar";
-        let signatureURL = config.api.base + config.api.signature;
-        let accessToken = this.state.user.accessToken;
-        request
-          .post(signatureURL, {
-            accessToken: accessToken,
-            timestamp: timestamp,
-            folder: folder,
-            tags: tags,
-            type: "avatar"
-          })
-          .catch(err => {
-            console.log(err);
-          })
-          .then(data => {
-            console.log(data);
+        // let avatarData = "data:image/jpeg;base64" + res.data
+        // let user = that.state.user;
+        // user.avatar = res.uri;
+        // that.setState({
+        //   user: user
+        // });
+        let uri = res.uri
+        console.log('193 '+uri)
+        that.getQiniuToken()
+          .then((data) => {
             if (data && data.success) {
-              let signature =
-                "folder=" +
-                folder +
-                "&tags=" +
-                tags +
-                "&timestamp=" +
-                timestamp +
-                CLOUDINARY.api_secret;
-              signature = sha1(signature);
-              console.log("加密" + signature);
-
+              console.log('200',data);
+              let token = data.data.token
+              let key = data.data.key
               let body = new FormData();
-              body.append("accessToken", accessToken);
-              body.append("folder", folder);
-              body.append("signature", signature);
-              body.append("tags", tags);
-              body.append("timestamp", timestamp);
-              body.append("api_key", CLOUDINARY.api_key);
-              body.append("resource_type", "image");
-              body.append("file", avatarData);
-
+              body.append("token", token);
+              body.append("key", key);
+              body.append("file", {
+                type:'image/jepg',
+                uri:uri,
+                name:key
+              });
               that._upload(body);
             }
-          });
+          })
       }
     });
   }
   _upload(body) {
-    console.log("body", body);
+    console.log("220", body);
     let that = this;
     let xhr = new XMLHttpRequest();
-    let url = CLOUDINARY.image;
+    let url = config.qiniu.upload
+    let user = that.state.user
 
-    console.log(url);
+    // console.log(url);
     that.setState({
       avatarUploading: true,
-      avatarProgress: 0
+      avatarProgress: 0,
+      user:user
     });
     xhr.open("POST", url);
     xhr.onload = () => {
@@ -237,7 +226,6 @@ export default class MySetting extends Component {
         alert("请求失败2");
         return;
       }
-      console.log("请求成功");
       let response;
       try {
         response = JSON.parse(xhr.response);
@@ -246,9 +234,9 @@ export default class MySetting extends Component {
         console.log(e);
         console.log("失败");
       }
-      if (response && response.public_id) {
+      if (response && response.key) {
         let user = this.state.user;
-        user.avatar = response.public_id;
+        user.avatar = response.key;
         that.setState({
           user: user,
           avatarUploading: false,
@@ -268,6 +256,12 @@ export default class MySetting extends Component {
       };
     }
     xhr.send(body);
+  }
+  logout(){
+    // var that = this
+    AsyncStorage.removeItem('user')
+    // this.props.navigation.navigate('Main')
+    // alert(1)
   }
   render() {
     // console.log("现在头像", this.state.user.avatar);
@@ -332,6 +326,28 @@ export default class MySetting extends Component {
             </View>
           </TouchableOpacity>
         )}
+        <TouchableOpacity
+          onPress={this.logout}
+                style={{
+                  width: width,
+                  height: 50,
+                  marginTop: 15,
+                  borderColor: "#3498db",
+                  borderWidth: 1,
+                  borderRadius: 3,
+                  justifyContent: "center"
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    textAlign: "center",
+                    color: "#3498db"
+                  }}
+                >
+                  退出登录
+                </Text>
+              </TouchableOpacity>
         <Modal
           animationType="slide"
           transparent={false}
@@ -375,12 +391,12 @@ export default class MySetting extends Component {
           })
         }
         <View style={{width:width,height:50,flexDirection:'row',marginTop:15,justifyContent:'space-around'}}>
-          <View style={[styles.sexSelector,user.gender === 'male' && styles.genderChecked]}>
+          <View style={[styles.sexSelector,this.state.user.gender === 'male' && styles.genderChecked]}>
             <TouchableOpacity onPress={() => this.changeState('gender','male')}>
               <Text style={{fontSize:28,fontWeight:'bold',color:'#3498db'}}>♂</Text>
             </TouchableOpacity>
           </View>
-          <View style={[styles.sexSelector,user.gender === 'female' && styles.genderChecked]}>
+          <View style={[styles.sexSelector,this.state.user.gender === 'female' && styles.genderChecked]}>
             <TouchableOpacity onPress={() => this.changeState('gender','female')}>
               <Text style={{fontSize:28,fontWeight:'bold',color:'#3498db'}}>♀</Text>
             </TouchableOpacity>

@@ -7,8 +7,12 @@ module.exports = {
             "Content-Type": "application/json"
         }
     },
+    qiniu:{
+        upload:'http://upload.qiniu.com'
+    },
     api: {
-        base: "http://rap2api.taobao.org/app/mock/86092/",
+        // base: "http://rap2api.taobao.org/app/mock/86092/",
+        base: "http://192.168.137.1:1234/",
         creations: "api/creations",
         comment: "api/comments",
         up: "api/up",
