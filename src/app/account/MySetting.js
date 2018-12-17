@@ -82,7 +82,7 @@ export default class MySetting extends Component {
       user: {},
       avatarProgress: 0,
       avatarUploading: false,
-      modalVisible: false
+      modalVisible: false,
     };
     this.pickPhoto = this.pickPhoto.bind(this);
     this._asyncUser = this._asyncUser.bind(this)
@@ -104,6 +104,7 @@ export default class MySetting extends Component {
       }
     });
   }
+  
   setModalVisible(visible) {
     this.setState({ modalVisible: visible });
   }
@@ -234,9 +235,15 @@ export default class MySetting extends Component {
         console.log(e);
         console.log("失败");
       }
-      if (response && response.key) {
+      if(response){
         let user = this.state.user;
-        user.avatar = response.key;
+
+        if(response.public_id){
+          user.avatar = response.public_id
+        }
+        if(response.key){
+          user.avatar = response.key;
+        }
         that.setState({
           user: user,
           avatarUploading: false,
@@ -329,7 +336,7 @@ export default class MySetting extends Component {
         <TouchableOpacity
           onPress={this.logout}
                 style={{
-                  width: width,
+                  width: width-18,
                   height: 50,
                   marginTop: 15,
                   borderColor: "#3498db",
@@ -360,7 +367,7 @@ export default class MySetting extends Component {
         <View style={styles.container}>
         <View style={styles.editBack}>
         <TouchableOpacity onPress={() => {this.setModalVisible(!this.state.modalVisible)}}>
-          <Icon name="ios-close" style={{fontSize:35,marginRight:20}}></Icon>
+          <Icon name="ios-close" style={{fontSize:35}}></Icon>
         </TouchableOpacity>
         </View>
         {
@@ -408,6 +415,7 @@ export default class MySetting extends Component {
               <View
                 style={{
                   height: 50,
+                  width:width-18,
                   marginTop: 15,
                   borderColor: "#3498db",
                   borderWidth: 1,
@@ -435,10 +443,12 @@ export default class MySetting extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FCFF"
+    backgroundColor: "#F5FCFF",
+    alignItems:'center'
   },
   header: {
     height: width / 6.5,
+    width:width,
     backgroundColor: "#3498db",
     alignItems: "center",
     justifyContent: "space-between",

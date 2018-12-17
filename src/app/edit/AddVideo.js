@@ -9,6 +9,8 @@ import ImagePicker from "react-native-image-picker";
 import sha1 from "sha1";
 import Videomp4 from "react-native-video";
 import * as Progress from "react-native-progress";
+import {AudioRecorder, AudioUtils} from 'react-native-audio';
+import Sound from 'react-native-sound';
 const config = require("../common/config");
 const request = require("../common/request");
 const Dimensions = require("Dimensions");
@@ -21,7 +23,6 @@ var options = {
   takePhotoButtonTitle: "录制10s视频",
   chooseFromLibraryButtonTitle: "选择已有视频",
   cameraType: "back",
-  mediaType: "photo",
   videoQuality: "medium",
   mediaType:"video",
   durationLimit: 10,
@@ -45,25 +46,36 @@ export default class AddVideo extends Component {
       resizeMode: "contain",
       repeat: false,
       videoReady: false,
-      videoUploadedProgress: 0.90,
       videoTotal: 0,
       currentTime: 0,
-      playing: false,
-      paused: false,
-      videoOk: true,
       content: "",
       isSending: false,
       KeyboardShown: false,
+      // video upload
       videoLoaded:false,
       videoUploading:false,
+      videoUploadedProgress: 0.90,
+      video:null,
+      //audio
+      audioName:'/gougou.aac',
+      audioPlaying:false,
+      recordDone:false,
+      recordPath:null,
+
+      //recording
+      recording:false,
+      counting:false
+
     }
     this._pickVideo = this._pickVideo.bind(this)
     this._onProgress = this._onProgress.bind(this);
     this._onEnd = this._onEnd.bind(this);
     this._rePlay = this._rePlay.bind(this);
-    this._pause = this._pause.bind(this);
-    this._resume = this._resume.bind(this);
     this._onError = this._onError.bind(this);
+    // this._counting = this._counting.bind(this);
+    this._record = this._record.bind(this);
+    this._preview = this._preview.bind(this);
+    this._initAudio = this._initAudio.bind(this)
     // this._fetchData = this._fetchData.bind(this);
     // this._submit = this._submit.bind(this);
   }
@@ -81,6 +93,81 @@ export default class AddVideo extends Component {
         });
       }
     });
+    that._initAudio()
+
+  }
+  _preview(){
+    // alert('待开发')
+    console.log(this.state.recordPath)
+    // if(this.state.audioPlaying){
+    //   AudioRecorder.stopPlaying()
+    // }
+    this.setState({
+      videoProgress:0,
+      audioPlaying:true
+    })
+    Sound.setCategory('Playback');
+    let demoAudio = require(`{this.state.recordPath}`)//支持众多格式
+    const s = new Sound(demoAudio, Sound.MAIN_BUNDLE, (e) => {
+      if (e) {
+        console.log('播放失败');
+        return;
+      }
+      s.play((success) => {
+        if(success){
+          console.log('successfully finished playing');
+        } else {
+        console.log('playback failed due to audio decoding errors');
+        s.reset();
+        }
+      });
+      });
+    // AudioRecorder.playRecording()
+    // this.refs.VideoPlayer.seek(0)
+  }
+  _onEnd() {
+    if(this.state.recording){
+      AudioRecorder.stopRecording()
+      this.setState({
+        videoProgress: 1,
+        recording:false,
+        recordDone:true
+      });
+    }
+  }
+  _record(){
+    let self = this
+    self.setState({
+      recording:true,
+      recordDone:false,
+      videoProgress:0
+    })
+    AudioRecorder.startRecording()
+    self.refs.VideoPlayer.seek(0)
+  }
+  _initAudio(){
+    let self = this
+    let audioPath = AudioUtils.DocumentDirectoryPath + this.state.audioName;
+    console.log('音频',audioPath)
+    AudioRecorder.prepareRecordingAtPath(audioPath, {
+      SampleRate: 22050,
+      Channels: 1,
+      AudioQuality: "Low",
+      AudioEncoding: "aac"
+    });
+    self.setState({
+      recordPath:audioPath
+    })
+    AudioRecorder.onProgress = (data) => {
+      this.setState({
+        currentTime:Math.floor(data.currentTime)
+      })
+      AudioRecorder.onFinished = (data) => {
+        this.setState({
+          finished :data.finished
+        })
+      }
+    }
   }
   getQiniuToken(){
     let accessToken = this.state.user.accessToken;
@@ -168,7 +255,7 @@ export default class AddVideo extends Component {
       let response;
       try {
         response = JSON.parse(xhr.response);
-        console.log(response);
+        console.log('上传响应:',response);
       } catch (e) {
         console.log(e);
         console.log("失败");
@@ -180,6 +267,24 @@ export default class AddVideo extends Component {
           videoUploading: false,
           videoUploaded: true,
         });
+        let videoURL = config.api.base + config.api.video
+        let accessToken = this.state.user.accessToken
+        request.post(videoURL,{
+          accessToken:accessToken,
+          video:response
+        })
+        .catch((err) => {
+          console.log(err)
+          alert('视频同步出错，请重新上传err！')
+        })
+        .then((data) => {
+          if(!data || !data.success){
+            alert('视频同步出错，请重新上传！')
+          }
+          if(data.success){
+            alert(data.msg)
+          }
+        })
       }
     };
     if (xhr.upload) {
@@ -201,19 +306,22 @@ export default class AddVideo extends Component {
     console.log("a");
   }
   _onProgress(data) {
-    //   console.log(data)
-    if (!this.state.videoReady) {
-      this.setState({
-        videoReady: true
-      });
-    }
-  }
-  _onEnd() {
+    let duration = data.playableDuration;
+    let currentTime = data.currentTime;
+    let percent = Number((currentTime / duration).toFixed(2));
     this.setState({
-      videoProgress: 1,
-      playing: false
+      videoTotal: duration,
+      currentTime: Number(data.currentTime.toFixed(2)),
+      videoProgress: percent
     });
+    //   console.log(data)
+    // if (!this.state.videoReady) {
+    //   this.setState({
+    //     videoReady: true
+    //   });
+    // }
   }
+ 
   _onError() {
     this.setState({
       videoOk: false
@@ -222,20 +330,8 @@ export default class AddVideo extends Component {
   _rePlay() {
     this.refs.VideoPlayer.seek(0);
   }
-  _pause() {
-    if (!this.state.paused) {
-      this.setState({
-        paused: true
-      });
-    }
-  }
-  _resume() {
-    if (this.state.paused) {
-      this.setState({
-        paused: false
-      });
-    }
-  }
+ 
+  
   
   render() {
     return (
@@ -280,14 +376,28 @@ export default class AddVideo extends Component {
                 <Text style={styles.progressTip}>正在生成静音视频,已经完成{(this.state.videoUploadedProgress *100).toFixed(2)}%</Text>
               </View>:null
             }
-            {/* <View style={styles.progressTipBox}>
+            {
+              this.state.recording ?
+              <View style={[styles.progressTipBox,this.state.recording && styles.progressRecording]}>
                 <Progress.Bar
                   showsText={true}
                   color={"#3498db"}
-                  progress={this.state.videoUploadedProgress}
+                  progress={this.state.videoProgress}
                 />
-                <Text style={styles.progressTip}>正在生成静音视频,已经完成{(this.state.videoUploadedProgress *100).toFixed(2)}%</Text>
-              </View> */}
+                {
+                  this.state.recording?
+                <Text style={styles.progressTip}>正在录制声音</Text>
+                  :null
+                }
+              </View>:null
+            }
+            {
+              this.state.recordDone
+              ?<TouchableOpacity style={styles.previewBox} onPress={this._preview}>
+                <Icon name='logo-youtube' style={styles.previewIcon}></Icon>
+              </TouchableOpacity>
+              :null
+            }
                 </View>
               </View>
               :<TouchableOpacity style={styles.uploadContainer}
@@ -301,6 +411,15 @@ export default class AddVideo extends Component {
               </TouchableOpacity>
             }
           </View>
+          {
+            this.state.videoUploaded?
+            <View style={styles.recordBox}>
+            <TouchableOpacity style={[styles.recordIconBox,this.state.recording && styles.recordOn]} onPress={this._record}>
+              <Icon name='ios-mic' size={32} style={styles.countBtn}/>
+            </TouchableOpacity>
+          </View>:null
+          }
+          
         </View>
     )
   }
@@ -312,6 +431,7 @@ const styles = StyleSheet.create({
     },
     header:{
       height: width/6.5,
+      width:width,
       backgroundColor: '#3498db',
       alignItems: 'center',
       flexDirection: 'row',
@@ -324,7 +444,8 @@ const styles = StyleSheet.create({
       marginLeft: 12,
     },
     page:{
-      flex:1,
+      height:300,
+      width:width,
       alignItems:'center'
     },
     uploadContainer:{
@@ -374,10 +495,18 @@ const styles = StyleSheet.create({
     },
     progressTipBox:{
       marginTop:10,
+      justifyContent:'center',
+      alignItems:'center'
+      
+    },
+    progressRecording:{
       width:width,
       alignItems:'center',
-      height:30,
-      backgroundColor:'rgba(244,244,244,0.65)'
+      justifyContent:'center',
+      height:height*0.4,
+      backgroundColor:'rgba(244,244,244,0.6)',
+      position:'relative',
+      top:-height*0.4-10
     },
     progressTip:{
       color:'#333',
@@ -385,5 +514,49 @@ const styles = StyleSheet.create({
       padding: 5,
       textAlign:'center'
     },
+    recordBox:{
+      width:width,
+      height:68,
+      alignItems:'center',
+      // borderWidth:1,
+      position:'relative',
+      top: -80,
+    },
+    recordIconBox:{
+      width:68,
+      height:68,
+      borderRadius:34,
+      borderWidth:1,
+      borderColor:'#fff',
+      alignItems:'center',
+      justifyContent:'center',
+      backgroundColor:'#3498db',
+      shadowColor: '#333',
+      
+    },
+    countBtn:{
+      fontSize:32,
+      color:'#fff'
+    },
+    recordOn:{
+      backgroundColor:'#ccc'
+    },
+    previewBox:{
+      width:80,
+      height:30,
+      position:'absolute',
+      right:10,
+      bottom:10,
+      // borderWidth:1,
+      borderRadius:3,
+      // borderColor:'#ee735c',
+      justifyContent:'center',
+      alignItems:'center'
+    },
+    previewIcon:{
+      fontSize:30,
+      color:'#ee735c'
+    }
+
 });
 
